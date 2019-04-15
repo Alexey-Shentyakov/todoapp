@@ -15,7 +15,7 @@ tests - phpunit тесты
 
 ./phpunit --bootstrap tests/autoload.php tests/TaskTest
 
-##зависимости
+## зависимости
 
 jquery
 
@@ -25,7 +25,7 @@ bootstrap
 
 защищенные методы контроллера указываются в константном массиве AUTH_PROTECTED_METHODS
 
-##пользователи
+## пользователи
 
 regUserAction() - создание пользователя
 
@@ -33,7 +33,7 @@ loginAction() - логин
 
 logoutAction() - выход
 
-##задачи
+## задачи
 
 createTaskAction() - создание задачи
 
