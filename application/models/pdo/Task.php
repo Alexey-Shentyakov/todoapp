@@ -65,7 +65,7 @@ class Task extends \core\ModelPDO {
 
     // ----------------------------
 
-    public function getById($id) {
+    public static function getById($id) {
         $db = static::getDB();
         $st = $db->prepare("select * from tasks where id = :id");
         $st->bindParam(':id', $id, \PDO::PARAM_STR);
