@@ -8,7 +8,8 @@ class Config
     	'host' => 'localhost',
     	'db' => 'todoapp',
     	'user' => 'root',
-    	'password' => 'rootgfhjkm'
+    	'password' => 'rootgfhjkm',
+        'charset' => 'utf8mb4'
     ];
     
     const DATABASE = 'PDO';

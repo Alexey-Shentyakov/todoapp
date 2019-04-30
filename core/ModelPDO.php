@@ -12,9 +12,10 @@ abstract class ModelPDO {
             $dbname = \application\Config::PDO['db'];
             $user = \application\Config::PDO['user'];
             $password = \application\Config::PDO['password'];
+            $charset = \application\Config::PDO['charset'];
             
             try {
-                $db = new \PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
+                $db = new \PDO("mysql:host=$host;dbname=$dbname;charset=$charset;", $user, $password);
             } catch (\PDOException $e) {
                 echo $e->getMessage();
             }
