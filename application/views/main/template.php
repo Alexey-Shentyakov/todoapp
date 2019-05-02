@@ -18,6 +18,22 @@
 </head>
 
 <body>
+<header>
+<?php
+session_start();
+
+if (!empty($_SESSION['user'])) {
+    $user = $_SESSION['user'];
+    echo "<strong>{$user->name}</strong>";
+    echo "<br>";
+    echo "<a href=\"/main/logout\">logout</a>";
+}
+else {
+    echo "<a href=\"/main/login\">login</a>";
+}
+
+?>
+</header>
 <div class="container">
 <?php echo $body_content ?>
 </div>

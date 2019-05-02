@@ -108,7 +108,7 @@ class Task extends \core\ModelPDO {
         }
 
         $db = static::getDB();
-        $st = $db->prepare("SELECT * FROM tasks ORDER BY target_time ASC LIMIT $tasks_per_page OFFSET :offset");
+        $st = $db->prepare("SELECT * FROM tasks ORDER BY parent_id DESC, target_time ASC LIMIT $tasks_per_page OFFSET :offset");
         $st->bindParam(':offset', $offset, \PDO::PARAM_INT);
         $result = $st->execute();
 

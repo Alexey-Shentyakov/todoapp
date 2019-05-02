@@ -7,7 +7,8 @@ class MainController extends \core\Controller {
     const AUTH_PROTECTED_METHODS = [
         'testAuthAction',
         'createTaskAction',
-        'editTaskAction'
+        'editTaskAction',
+        'closeTaskAction'
     ];
 
     // -------------------------
@@ -68,7 +69,11 @@ class MainController extends \core\Controller {
             $email = $_POST['email'];
             $password = $_POST['password'];
             $result = $this->auth($email, $password);
-            var_dump($result);
+            //var_dump($result);
+
+            if ($result->status === 'success') {
+                header("Location: /main/index");
+            }
         }
         else {
             // display login form
@@ -84,7 +89,7 @@ class MainController extends \core\Controller {
         
         if (!empty($_SESSION['user'])) {
             $_SESSION['user'] = null;
-            echo 'logged out';
+            header("Location: /main/index");
         }
     }
 
@@ -160,6 +165,8 @@ class MainController extends \core\Controller {
                 }
 
                 if ($this->checkCsrfToken($csrf_token)) {
+                    $name = htmlspecialchars($name, ENT_HTML5, 'UTF-8');
+                    $body = htmlspecialchars($body, ENT_HTML5, 'UTF-8');
                     $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
                 }
             }
@@ -272,8 +279,8 @@ class MainController extends \core\Controller {
             $user_id = $_POST['user_id'];
 
             if (empty($parent_id)) {
-                    $parent_id = null;
-                }
+                $parent_id = null;
+            }
 
             $csrf_token = $_POST['csrf_token'];
 
@@ -287,12 +294,13 @@ class MainController extends \core\Controller {
             $task->user_id = $user_id;
 
             // save updated task
+            $result = false;
             if ($this->checkCsrfToken($csrf_token)) {
                 $result = \application\models\pdo\Task::save($task);
             }
 
             if ($result) {
-                echo "task modified";
+                header("Location: /main/listTasks");
             }
         }
     }
@@ -305,7 +313,7 @@ class MainController extends \core\Controller {
             $result = \application\models\pdo\Task::close($task_id);
 
             if ($result) {
-                echo "task closed";
+                header("Location: /main/listTasks");
             }
         }
     }
