@@ -5,7 +5,8 @@ namespace application\controllers;
 class MainController extends \core\Controller {
 
     const AUTH_PROTECTED_METHODS = [
-        'testAuthAction'
+        'testAuthAction',
+        'createTaskAction'
     ];
 
     // -------------------------
@@ -112,6 +113,9 @@ class MainController extends \core\Controller {
     // --------------------------------
 
     public function createTaskAction() {
+
+        session_start();
+        
         if (!empty($_POST)) {
             // create new task
 
@@ -119,19 +123,22 @@ class MainController extends \core\Controller {
             $body = $_POST['body'];
             $target_time = $_POST['target_time'];
             $user_id = $_POST['user_id'];
+            $csrf_token = $_POST['csrf_token'];
 
             if (isset($_POST['parent_id'])) {
                 $parent_id = $_POST['parent_id'];
             }
 
             $result = false;
-            if (!empty($name)) {
+            if (!empty($name) && !empty($csrf_token)) {
 
                 if (empty($parent_id)) {
                     $parent_id = null;
                 }
-                
-                $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
+
+                if ($csrf_token === $_SESSION['csrf_token']) {
+                    $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
+                }
             }
 
             if ($result) {
@@ -142,10 +149,14 @@ class MainController extends \core\Controller {
             // display create task form
 
             $top_level_tasks = \application\models\pdo\Task::getTopLevelTasks();
-
             $users_names_ids = \application\models\pdo\User::getNamesWithIds();
+
+            $csrf_token = bin2hex(random_bytes(32));
+            $_SESSION['csrf_token'] = $csrf_token;
             
-            $create_task = \core\View::render("main/create_task.php", ['parents' => $top_level_tasks, 'users' => $users_names_ids], true);
+            $create_task = \core\View::render("main/create_task.php",
+            ['parents' => $top_level_tasks, 'users' => $users_names_ids, 'csrf_token' => $csrf_token],
+            true);
             \core\View::render("main/template.php", ['title' => 'Create new task', 'body_content' => $create_task]);
         }
     }
@@ -262,48 +273,46 @@ class MainController extends \core\Controller {
         }
     }
 
+    // ------------------------------
+
+    public function seedUsersAction() {
+
+        for ($n = 1; $n <= 10; $n ++) {
+            $name = "user$n";
+            $email = "email$n@mail.com";
+            $password = "1";
+
+            $user_id = \application\models\pdo\User::create($name, $email, $password);
+            echo "$user_id\n";
+        }
+    }
+
+    // ------------------------------
+
     public function seedTasksAction() {
 
         $users = \application\models\pdo\User::getNamesWithIds();
-        
-        for ($n = 1; $n <= 30; $n ++) {
-            $name = "task $n";
-            $body = "body $n";
-            $parent_id = null;
-            $target_time = "2019-04-13 08:$n:00";
 
-            $rand_key = array_rand($users);
-            $user_id = $users[$rand_key]->id;
-            
-            $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
+        if (count($users) >= 1) {
+            for ($n = 1; $n <= 30; $n ++) {
+                $name = "task $n";
+                $body = "body $n";
+                $parent_id = null;
+                $target_time = "2019-04-13 08:$n:00";
+    
+                $rand_key = array_rand($users);
+                $user_id = $users[$rand_key]->id;
+                
+                $task_id = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
+                echo "$task_id\n";
+            }
         }
     }
 
     // ================================
 
-
-
-    /*public function testGTLTAction() {
-        $result = \application\models\pdo\Task::getTopLevelTasks();
-        var_dump($result);
-    }*/
-
-    /*public function testCreateTaskAction() {
-        $name = 'task1';
-        $body = 'hello';
-        $parent_id = null;
-        $result = \application\models\pdo\Task::create($name, $body, $parent_id);
-        var_dump($result);
-    }*/
-
     public function testAuthAction() {
         print_r($_SESSION['user']);
-        
-        //$name = "name1";
-        //$email = "aa@bb.cc";
-        //$password = "1";
-        //echo \application\models\pdo\User::create($name, $email, $password);
-        //echo strlen(\application\models\pdo\User::uuid());
     }
     
 	public function helloAction() {
@@ -315,9 +324,11 @@ class MainController extends \core\Controller {
 
         // check if auth protected
         if (in_array($method, self::AUTH_PROTECTED_METHODS)) {
+
             session_start();
+            
             if (empty($_SESSION['user'])) {
-                echo "no auth!";exit;
+                header("Location: /main/login");
             }
         }
 	}

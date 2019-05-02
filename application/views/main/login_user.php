@@ -1,3 +1,6 @@
+<div class="row text-center">
+<div class="col-12">
+
 <form action="/main/login" enctype="multipart/form-data" method="post">
     <fieldset>
         <legend></legend>
@@ -6,3 +9,6 @@
     </fieldset>
     <p><input type="submit" value="Submit"></p>
 </form>
+
+</div>
+</div>

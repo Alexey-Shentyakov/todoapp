@@ -3,8 +3,20 @@
 <form action="/main/createTask" enctype="multipart/form-data" method="post">
     <fieldset>
         <legend></legend>
-        <p><label for="name">Name</label><input type="text" id="name" name="name" size="30" required></p>
-        <p><label for="body">Body</label><textarea id="body" name="body" rows="10" cols="30" required></textarea></p>
+
+        <!-- name -->
+        <p>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" size="30" required>
+        </p>
+
+        <!-- body -->
+        <p>
+        <label for="body">Body</label>
+        <textarea id="body" name="body" rows="10" cols="30" required></textarea>
+        </p>
+
+        <!-- parent -->
         <p><label for="parent_id">Parent</label>
         <select id="parent_id" name="parent_id">
             <option value="">-</option>
@@ -14,11 +26,13 @@
         }
         ?>
         </select></p>
-        
+
+        <!-- target time -->
         <p>
         <label for="datetime">Target Time</label>
         <input type="datetime-local" id="datetime" name="target_time" required></p>
 
+        <!-- user -->
         <p>
         <label for="user_id">User ID</label>
         <select id="user_id" name="user_id">
@@ -29,6 +43,9 @@
         ?>
         </select>
         </p>
+
+        <!-- csrf -->
+        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
         
     </fieldset>
     <p><input type="submit" value="Submit"></p>
