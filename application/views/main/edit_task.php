@@ -71,6 +71,10 @@
     </select>
     </p>
 
+    <!-- csrf -->
+    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+
+    <!-- task id -->
     <input type="hidden" name="task_id" value="<?php echo $task->id ?>">
     
     </fieldset>
