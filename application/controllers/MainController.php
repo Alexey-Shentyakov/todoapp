@@ -6,7 +6,8 @@ class MainController extends \core\Controller {
 
     const AUTH_PROTECTED_METHODS = [
         'testAuthAction',
-        'createTaskAction'
+        'createTaskAction',
+        'editTaskAction'
     ];
 
     // -------------------------
@@ -112,9 +113,31 @@ class MainController extends \core\Controller {
 
     // --------------------------------
 
-    public function createTaskAction() {
-
+    private function generateCsrfToken() {
         session_start();
+        
+        $csrf_token = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token'] = $csrf_token;
+
+        return $csrf_token;
+    }
+
+    // --------------------------------
+
+    private function checkCsrfToken($csrf_token) {
+        session_start();
+
+        if ($csrf_token === $_SESSION['csrf_token']) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    // --------------------------------
+
+    public function createTaskAction() {
         
         if (!empty($_POST)) {
             // create new task
@@ -136,7 +159,7 @@ class MainController extends \core\Controller {
                     $parent_id = null;
                 }
 
-                if ($csrf_token === $_SESSION['csrf_token']) {
+                if ($this->checkCsrfToken($csrf_token)) {
                     $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
                 }
             }
@@ -151,8 +174,7 @@ class MainController extends \core\Controller {
             $top_level_tasks = \application\models\pdo\Task::getTopLevelTasks();
             $users_names_ids = \application\models\pdo\User::getNamesWithIds();
 
-            $csrf_token = bin2hex(random_bytes(32));
-            $_SESSION['csrf_token'] = $csrf_token;
+            $csrf_token = $this->generateCsrfToken();
             
             $create_task = \core\View::render("main/create_task.php",
             ['parents' => $top_level_tasks, 'users' => $users_names_ids, 'csrf_token' => $csrf_token],
@@ -229,9 +251,12 @@ class MainController extends \core\Controller {
 
             if ($task !== null) {
                 $top_level_tasks = \application\models\pdo\Task::getTopLevelTasks();
+                $csrf_token = $this->generateCsrfToken();
 
                 // display edit task form
-                $edit_task = \core\View::render("main/edit_task.php", ['task' => $task, 'parents' => $top_level_tasks], true);
+                $edit_task = \core\View::render("main/edit_task.php",
+                ['task' => $task, 'parents' => $top_level_tasks, 'csrf_token' => $csrf_token],
+                true);
                 \core\View::render("main/template.php", ['title' => 'Edit task', 'body_content' => $edit_task]);
             }
         }
@@ -242,6 +267,7 @@ class MainController extends \core\Controller {
             $body = $_POST['body'];
             $parent_id = $_POST['parent_id'];
             $status = $_POST['status'];
+            $csrf_token = $_POST['csrf_token'];
 
             $task = new \stdClass();
             $task->id = $task_id;
@@ -252,7 +278,9 @@ class MainController extends \core\Controller {
             $task->status = $status;
 
             // save updated task
-            $result = \application\models\pdo\Task::save($task);
+            if ($this->checkCsrfToken($csrf_token)) {
+                $result = \application\models\pdo\Task::save($task);
+            }
 
             if ($result) {
                 echo "task modified";
