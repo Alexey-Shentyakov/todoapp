@@ -9,6 +9,7 @@
     <th>body</th>
     <th>parent</th>
     <th>status</th>
+    <th>user</th>
     <th>edit</th>
     <th>close</th>
 </tr>
@@ -54,6 +55,7 @@ $.ajax({
             table_item += "<td>" + currentValue.body + "</td>";
             table_item += "<td>" + currentValue.parent_name + "</td>";
             table_item += "<td>" + currentValue.status + "</td>";
+            table_item += "<td>" + currentValue.user_name + "</td>";
             table_item += "<td><a href=\"/main/editTask/" + currentValue.id + "\">EDIT</a></td>";
             table_item += "<td><a href=\"/main/closeTask/" + currentValue.id + "\">CLOSE</a></td>";
             table_item += "</tr>";

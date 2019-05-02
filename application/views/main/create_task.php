@@ -14,8 +14,23 @@
         }
         ?>
         </select></p>
+        
+        <p>
+        <label for="datetime">Target Time</label>
+        <input type="datetime-local" id="datetime" name="target_time" required></p>
+
+        <p>
+        <label for="user_id">User ID</label>
+        <select id="user_id" name="user_id">
+        <?php
+        foreach ($users as $u) {
+            echo '<option value="' . $u->id . '">' . $u->name . ' (' . $u->email . ')' . '</option>' . "\n";
+        }
+        ?>
+        </select>
+        </p>
+        
     </fieldset>
-    <p><input type="datetime-local" id="datetime" name="target_time" required></p>
     <p><input type="submit" value="Submit"></p>
 </form>
 </div>

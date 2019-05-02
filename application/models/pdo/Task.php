@@ -4,21 +4,27 @@ namespace application\models\pdo;
 
 class Task extends \core\ModelPDO {
     
-    public static function create($name, $body, $parent_id, $target_time) {
+    public static function create($name, $body, $parent_id, $target_time, $user_id) {
         $result = false;
 
-        if (!empty($name) && !empty($body)) {
+        if (!empty($name) && !empty($body) && !empty($user_id)) {
             $new_id = static::uuid();
             $status = 'active';
 
             $db = static::getDB();
-            $st = $db->prepare("insert into tasks (id, name, target_time, body, parent_id, status) values (:id, :name, :target_time, :body, :parent_id, :status)");
+
+            $st = $db->prepare(
+            "INSERT INTO tasks (id, name, target_time, body, parent_id, status, user_id)
+            VALUES (:id, :name, :target_time, :body, :parent_id, :status, :user_id)"
+            );
+
             $st->bindParam(':id', $new_id, \PDO::PARAM_STR);
             $st->bindParam(':name', $name, \PDO::PARAM_STR);
             $st->bindParam(':target_time', $target_time, \PDO::PARAM_STR);
             $st->bindParam(':body', $body, \PDO::PARAM_STR);
             $st->bindParam(':parent_id', $parent_id, \PDO::PARAM_STR);
             $st->bindParam(':status', $status, \PDO::PARAM_STR);
+            $st->bindParam(':user_id', $user_id, \PDO::PARAM_STR);
             $result = $st->execute();
         }
 
@@ -38,15 +44,23 @@ class Task extends \core\ModelPDO {
         $body = $task->body;
         $parent_id = $task->parent_id;
         $status = $task->status;
+        $user_id = $task->user_id;
 
         $db = static::getDB();
-        $st = $db->prepare("UPDATE tasks SET name = :name, target_time = :target_time, body = :body, parent_id = :parent_id, status = :status WHERE id = :id");
+        
+        $st = $db->prepare(
+        "UPDATE tasks
+        SET name = :name, target_time = :target_time, body = :body, parent_id = :parent_id, status = :status, user_id = :user_id
+        WHERE id = :id"
+        );
+
         $st->bindParam(':id', $id, \PDO::PARAM_STR);
         $st->bindParam(':name', $name, \PDO::PARAM_STR);
         $st->bindParam(':target_time', $target_time, \PDO::PARAM_STR);
         $st->bindParam(':body', $body, \PDO::PARAM_STR);
         $st->bindParam(':parent_id', $parent_id, \PDO::PARAM_STR);
         $st->bindParam(':status', $status, \PDO::PARAM_STR);
+        $st->bindParam(':user_id', $user_id, \PDO::PARAM_STR);
         $result = $st->execute();
 
         return $result;
@@ -56,7 +70,7 @@ class Task extends \core\ModelPDO {
 
     public static function getTopLevelTasks() {
         $db = static::getDB();
-        $st = $db->prepare("select * from tasks where parent_id IS NULL ORDER BY name ASC");
+        $st = $db->prepare("SELECT * FROM tasks WHERE parent_id IS NULL ORDER BY name ASC");
         $st->execute();
         $result = $st->fetchAll(\PDO::FETCH_CLASS);
 
@@ -67,7 +81,7 @@ class Task extends \core\ModelPDO {
 
     public static function getById($id) {
         $db = static::getDB();
-        $st = $db->prepare("select * from tasks where id = :id");
+        $st = $db->prepare("SELECT * FROM tasks WHERE id = :id");
         $st->bindParam(':id', $id, \PDO::PARAM_STR);
         $st->execute();
         $task = $st->fetchObject();
@@ -107,7 +121,7 @@ class Task extends \core\ModelPDO {
 
     public static function getChildTasks($id) {
         $db = static::getDB();
-        $st = $db->prepare("select * from tasks WHERE parent_id = :id");
+        $st = $db->prepare("SELECT * FROM tasks WHERE parent_id = :id");
         $st->bindParam(':id', $id, \PDO::PARAM_STR);
         $st->execute();
         $result = $st->fetchAll(\PDO::FETCH_CLASS);

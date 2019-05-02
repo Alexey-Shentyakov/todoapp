@@ -118,6 +118,7 @@ class MainController extends \core\Controller {
             $name = $_POST['name'];
             $body = $_POST['body'];
             $target_time = $_POST['target_time'];
+            $user_id = $_POST['user_id'];
 
             if (isset($_POST['parent_id'])) {
                 $parent_id = $_POST['parent_id'];
@@ -130,19 +131,21 @@ class MainController extends \core\Controller {
                     $parent_id = null;
                 }
                 
-                $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time);
+                $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
             }
 
             if ($result) {
-                echo "new task created";
+                echo "new task created, id = $result";
             }
         }
         else {
             // display create task form
 
             $top_level_tasks = \application\models\pdo\Task::getTopLevelTasks();
+
+            $users_names_ids = \application\models\pdo\User::getNamesWithIds();
             
-            $create_task = \core\View::render("main/create_task.php", ['parents' => $top_level_tasks], true);
+            $create_task = \core\View::render("main/create_task.php", ['parents' => $top_level_tasks, 'users' => $users_names_ids], true);
             \core\View::render("main/template.php", ['title' => 'Create new task', 'body_content' => $create_task]);
         }
     }
@@ -174,6 +177,7 @@ class MainController extends \core\Controller {
         $tasks = \application\models\pdo\Task::getAllTasks($page);
 
         foreach ($tasks as $key => $t) {
+            // get parent name
             $parent = \application\models\pdo\Task::getById($t->parent_id);
 
             if ($parent !== null) {
@@ -181,6 +185,16 @@ class MainController extends \core\Controller {
             }
             else {
                 $tasks[$key]->parent_name = '';
+            }
+
+            // get user name
+            $user = \application\models\pdo\User::getById($t->user_id);
+
+            if ($user !== null) {
+                $tasks[$key]->user_name = $user->name;
+            }
+            else {
+                $tasks[$key]->user_name = '';
             }
         }
 
@@ -249,12 +263,19 @@ class MainController extends \core\Controller {
     }
 
     public function seedTasksAction() {
-        for ($n = 1; $n < 30; $n ++) {
+
+        $users = \application\models\pdo\User::getNamesWithIds();
+        
+        for ($n = 1; $n <= 30; $n ++) {
             $name = "task $n";
             $body = "body $n";
             $parent_id = null;
             $target_time = "2019-04-13 08:$n:00";
-            $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time);
+
+            $rand_key = array_rand($users);
+            $user_id = $users[$rand_key]->id;
+            
+            $result = \application\models\pdo\Task::create($name, $body, $parent_id, $target_time, $user_id);
         }
     }
 
