@@ -17,7 +17,7 @@
 
     <p>
         <label for="parent_id">Parent</label>
-    <select id="parent_id" name="parent_id" required>
+    <select id="parent_id" name="parent_id">
         <option value="">-</option>
     <?php
     foreach ($parents as $p) {
@@ -49,6 +49,25 @@
                     break;
             }
         ?>
+    </select>
+    </p>
+
+    <!-- user -->
+    <p>
+    <label for="user_id">User ID</label>
+    <select id="user_id" name="user_id">
+    <?php
+    foreach ($users as $u) {
+        $option = '<option value="' . $u->id . '"';
+
+        if ($u->id === $task->user_id) {
+            $option .= " selected";
+        }
+        
+        $option .= '>' . $u->name . ' (' . $u->email . ')' . '</option>' . "\n";
+        echo $option;
+    }
+    ?>
     </select>
     </p>
 
