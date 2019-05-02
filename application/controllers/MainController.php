@@ -229,9 +229,12 @@ class MainController extends \core\Controller {
 
             if ($task !== null) {
                 $top_level_tasks = \application\models\pdo\Task::getTopLevelTasks();
+                $users_names_ids = \application\models\pdo\User::getNamesWithIds();
 
                 // display edit task form
-                $edit_task = \core\View::render("main/edit_task.php", ['task' => $task, 'parents' => $top_level_tasks], true);
+                $edit_task = \core\View::render("main/edit_task.php",
+                ['task' => $task, 'parents' => $top_level_tasks, 'users' => $users_names_ids],
+                 true);
                 \core\View::render("main/template.php", ['title' => 'Edit task', 'body_content' => $edit_task]);
             }
         }
@@ -242,6 +245,11 @@ class MainController extends \core\Controller {
             $body = $_POST['body'];
             $parent_id = $_POST['parent_id'];
             $status = $_POST['status'];
+            $user_id = $_POST['user_id'];
+
+            if (empty($parent_id)) {
+                    $parent_id = null;
+                }
 
             $task = new \stdClass();
             $task->id = $task_id;
@@ -250,6 +258,7 @@ class MainController extends \core\Controller {
             $task->body = $body;
             $task->parent_id = $parent_id;
             $task->status = $status;
+            $task->user_id = $user_id;
 
             // save updated task
             $result = \application\models\pdo\Task::save($task);
